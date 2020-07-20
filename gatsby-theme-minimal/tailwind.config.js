@@ -1,6 +1,21 @@
 const defaultTheme = require("tailwindcss/defaultTheme")
+const themePackageDir = require("./themePackageDir")
+
+const purge = [
+    `src/**/*.js`,
+    `src/**/*.ts`,
+    `src/**/*.jsx`,
+    `src/**/*.tsx`,
+    `${themePackageDir}/src/**/*.js`,
+    `${themePackageDir}/src/**/*.ts`,
+    `${themePackageDir}/src/**/*.jsx`,
+    `${themePackageDir}/src/**/*.tsx`,
+]
+
+module.exports.purge = purge
 
 module.exports = {
+    purge,
     theme: {
         extend: {
             colors: {

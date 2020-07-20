@@ -1,4 +1,6 @@
-const package = require("./package.json")
+const tailwindcss = require("tailwindcss")
+const { exists } = require("./util")
+const themePackageDir = require("./themePackageDir")
 
 module.exports = options => ({
     plugins: [
@@ -6,32 +8,9 @@ module.exports = options => ({
             resolve: `gatsby-plugin-postcss`,
             options: {
                 postCssPlugins: [
-                    require("tailwindcss"),
-                    require(`@fullhuman/postcss-purgecss`)({
-                        content: [
-                            `src/**/*.js`,
-                            `src/**/*.ts`,
-                            `src/**/*.jsx`,
-                            `src/**/*.tsx`,
-                            `node_modules/${package.name}/src/**/*.js`,
-                            `node_modules/${package.name}/src/**/*.ts`,
-                            `node_modules/${package.name}/src/**/*.jsx`,
-                            `node_modules/${package.name}/src/**/*.tsx`,
-                            `../node_modules/${package.name}/src/**/*.js`,
-                            `../node_modules/${package.name}/src/**/*.ts`,
-                            `../node_modules/${package.name}/src/**/*.jsx`,
-                            `../node_modules/${package.name}/src/**/*.tsx`,
-                        ],
-                        defaultExtractor: content => {
-                            // Capture as liberally as possible, including things like `h-(screen-1.5)`
-                            const broadMatches = content.match(/[^<>"'`\s]*[^<>"'`\s:]/g) || []
-
-                            // Capture classes within other delimiters like .block(class="w-1/2") in Pug
-                            const innerMatches = content.match(/[^<>"'`\s.()]*[^<>"'`\s.():]/g) || []
-
-                            return broadMatches.concat(innerMatches)
-                        }
-                    }),
+                    exists("tailwind.config.js") ? tailwindcss("tailwind.config.js") :
+                        exists(`${themePackageDir}/tailwind.config.js`) ? tailwindcss(`${themePackageDir}/tailwind.config.js`) :
+                            tailwindcss,
                     require(`cssnano`)({
                         preset: `default`,
                     })
