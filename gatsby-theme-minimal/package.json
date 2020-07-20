@@ -6,5 +6,13 @@
   "license": "MIT",
   "peerDependencies": {
     "gatsby": "^2.6.0"
+  },
+  "dependencies": {
+    "gatsby-plugin-postcss": "^2.3.11"
+  },
+  "devDependencies": {
+    "@fullhuman/postcss-purgecss": "^2.3.0",
+    "cssnano": "^4.1.10",
+    "tailwindcss": "^1.5.1"
   }
 }
