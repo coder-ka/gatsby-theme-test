@@ -1,7 +1,4 @@
 const path = require("path")
-const tailwindcss = require("tailwindcss")
-const { exists } = require("./util")
-const themePackageDir = require("./themePackageDir")
 
 module.exports = options => ({
     siteMetadata: {
@@ -12,17 +9,7 @@ module.exports = options => ({
     },
     plugins: [
         {
-            resolve: `gatsby-plugin-postcss`,
-            options: {
-                postCssPlugins: [
-                    exists("tailwind.config.js") ? tailwindcss("tailwind.config.js") :
-                        exists(`${themePackageDir}/tailwind.config.js`) ? tailwindcss(`${themePackageDir}/tailwind.config.js`) :
-                            tailwindcss,
-                    require(`cssnano`)({
-                        preset: `default`,
-                    })
-                ]
-            }
+            resolve: `gatsby-plugin-postcss`
         },
         {
             resolve: `gatsby-source-filesystem`,
