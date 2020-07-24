@@ -2,10 +2,8 @@ const path = require("path")
 
 module.exports = options => ({
     siteMetadata: {
-        navigations: [{
-            title: "hoge",
-            href: "/"
-        }]
+        title: "hoge",
+        subTitle: "hoge"
     },
     plugins: [
         {
