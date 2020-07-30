@@ -15,8 +15,8 @@ module.exports = options => {
     const submitButton = options.submitButton || { caption: "Register" }
     const emailAddressInput = options.emailAddressInput || { 
         placeholder: "Enter your email address.", 
-        errorMessageWhenEmpty: "Please enter an email address.",
-        errorMessageWhenInvalid: "Please enter a valid email address.",
+        errorMessageWhenEmpty: "Enter your email address.",
+        errorMessageWhenInvalid: "Invalid email address format.",
     }
     const joinWaitlistButton = options.joinWaitlistButton || { caption: "Join the waitlist." }
     const joinWaitlistCompleteMessage = options.joinWaitlistCompleteMessage || "We've sent an email to you! Check it out now!"

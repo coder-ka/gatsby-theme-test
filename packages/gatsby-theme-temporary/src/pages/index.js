@@ -1,38 +1,39 @@
-import React, { useState } from "react"
-import { graphql, useStaticQuery } from "gatsby"
-import { isEmail } from "validator"
+import React, { useState } from "react";
+import { graphql, useStaticQuery } from "gatsby";
+import { isEmail } from "validator";
 
-import Img from "gatsby-image"
-import Spinner from "react-spinkit"
+import Img from "gatsby-image";
+import Spinner from "react-spinkit";
 
-import Dimmer from "../components/dimmer"
-import Icon from "../components/icon"
+import Dimmer from "../components/dimmer";
+import Icon from "../components/icon";
 
-import SimpleLayout from "../components/simple/simple-layout";
-import SimpleAppeal from "../components/simple/simple-appeal"
-import SimpleJoinWaitlistPopup from "../components/simple/simple-join-waitlist-popup"
+import SimpleLayout from "../components/simple-layout";
+import SimpleHeader from "../components/simple-header";
+import SimpleAppeal from "../components/simple-appeal";
+import SimpleJoinWaitlistPopup from "../components/simple-join-waitlist-popup";
 
-import { addToWaitlist } from "../api/wailtlist"
+import { addToWaitlist } from "../api/wailtlist";
 
 import useBoolean from "../hooks/useBoolean";
 
 export default function Home() {
-  const { logo, appImage, site } = useStaticQuery(graphql`
+  const { logoFile, appImageFile, site } = useStaticQuery(graphql`
     query {
-      logo: file(relativePath: { eq: "logo.png" }) {
+      logoFile: file(relativePath: { eq: "logo.png" }) {
         childImageSharp {
           fixed(height: 50) {
             ...GatsbyImageSharpFixed_tracedSVG
           }
         }
-      },
-      appImage: file(relativePath: {eq: "app-image.png"}) {
+      }
+      appImageFile: file(relativePath: { eq: "app-image.png" }) {
         childImageSharp {
           fluid(maxWidth: 1024) {
             ...GatsbyImageSharpFluid_tracedSVG
           }
         }
-      },
+      }
       site {
         siteMetadata {
           theme
@@ -59,133 +60,155 @@ export default function Home() {
         }
       }
     }
-  `)
+  `);
 
-  const [emailAddress, setEmailAddress] = useState("")
-  const [emailAddressIsEmpty, setEmailAddressIsEmpty] = useState(false)
-  const [emailAddressIsInvalid, setEmailAddressIsInvalid] = useState(false)
+  const [emailAddress, setEmailAddress] = useState("");
+  const [emailAddressIsEmpty, setEmailAddressIsEmpty] = useState(false);
+  const [emailAddressIsInvalid, setEmailAddressIsInvalid] = useState(false);
 
-  const [showRegistrationPopup, openRegistrationPopup, closeRegistrationPopup] = useBoolean()
-  const [showJoinWaitlistPopup, openJoinWaitlistPopup, closeJoinWaitlistPopup] = useBoolean()
+  const [
+    showRegistrationPopup,
+    openRegistrationPopup,
+    closeRegistrationPopup,
+  ] = useBoolean();
+  const [
+    showJoinWaitlistPopup,
+    openJoinWaitlistPopup,
+    closeJoinWaitlistPopup,
+  ] = useBoolean();
 
-  const openPopup = site.siteMetadata.released ? openRegistrationPopup : openJoinWaitlistPopup
-  const closePopup = site.siteMetadata.released ? closeRegistrationPopup : closeJoinWaitlistPopup
+  const openPopup = site.siteMetadata.released
+    ? openRegistrationPopup
+    : openJoinWaitlistPopup;
+  const closePopup = site.siteMetadata.released
+    ? closeRegistrationPopup
+    : closeJoinWaitlistPopup;
 
-  const [loading, startLoading, stopLoading] = useBoolean()
-  const [done, setDone] = useState(false)
+  const [loading, startLoading, stopLoading] = useBoolean();
+  const [done, setDone] = useState(false);
 
   switch (site.siteMetadata.theme) {
     case "simple":
+      const logo = <Img fixed={logoFile.childImageSharp.fixed}></Img>;
+      const title = (props) => <h1 {...props}>{site.siteMetadata.title}</h1>;
+      const subTitle = (props) => (
+        <h2 {...props}>{site.siteMetadata.subTitle}</h2>
+      );
+      const submitButton = (props) => (
+        <button {...props} onClick={openPopup}>
+          {site.siteMetadata.submitButton.caption}
+        </button>
+      );
+      const appImage = <Img fluid={appImageFile.childImageSharp.fluid}></Img>;
+      const appeals =
+        site.siteMetadata.appeals &&
+        site.siteMetadata.appeals.map(({ icon, title, description }, index) => (
+          <SimpleAppeal
+            key={index}
+            icon={<Icon name={icon} />}
+            title={<h3>{title}</h3>}
+            description={<p>{description}</p>}
+          ></SimpleAppeal>
+        ));
+      const emailInput = (props) => (
+        <input
+          {...props}
+          type="email"
+          value={emailAddress}
+          onChange={(e) => setEmailAddress(e.target.value)}
+          placeholder={site.siteMetadata.emailAddressInput.placeholder}
+        ></input>
+      );
+
+      const emailInputErrorMessage = emailAddressIsEmpty
+        ? site.siteMetadata.emailAddressInput.errorMessageWhenEmpty
+        : emailAddressIsInvalid
+        ? site.siteMetadata.emailAddressInput.errorMessageWhenInvalid
+        : null;
+
       return (
         <>
           <SimpleLayout
-            logo={<Img fixed={logo.childImageSharp.fixed}></Img>}
-            title={<h1>{site.siteMetadata.title}</h1>}
-            subTitle={<h2>{site.siteMetadata.subTitle}</h2>}
-            emailInput={props => (
-              <input
-                {...props}
-                type="email"
-                value={emailAddress}
-                onChange={e => setEmailAddress(e.target.value)}
-                placeholder={site.siteMetadata.emailAddressInput.placeholder}>
-              </input>
-            )}
-            submitButton={props => (
-              <button {...props}
-                onClick={openPopup}>
-                {site.siteMetadata.submitButton.caption}
-              </button>
-            )}
-            appImage={<Img fluid={appImage.childImageSharp.fluid}></Img>}
-            appeals={
-              site.siteMetadata.appeals &&
-              site.siteMetadata.appeals.map(({ icon, title, description }, index) => (
-                <SimpleAppeal
-                  key={index}
-                  icon={<Icon name={icon} />}
-                  title={<h3>{title}</h3>}
-                  description={<p>{description}</p>}>
-                </SimpleAppeal>)
-              )
+            header={
+              <SimpleHeader
+                logo={logo}
+                title={title}
+                subTitle={subTitle}
+                submitButton={submitButton}
+                appImage={appImage}
+              ></SimpleHeader>
             }
-            showRegistrationPopup={showRegistrationPopup}
-            showJoinWaitlistPopup={showJoinWaitlistPopup}
-          >
-          </SimpleLayout>
-
-          {(showRegistrationPopup || showJoinWaitlistPopup) ?
+            submitButton={submitButton}
+            appeals={appeals}
+          ></SimpleLayout>
+          {showRegistrationPopup || showJoinWaitlistPopup ? (
             <Dimmer
               className="bg-gray-900"
               onIntentToClose={closePopup}
-              closeButton={props => (
+              closeButton={(props) => (
                 <span {...props}>
                   <Icon name="times"></Icon>
                 </span>
-              )}>
-              {showRegistrationPopup ? (
-                // registration popup
-                null
-              ) : null}
+              )}
+            >
+              {showRegistrationPopup
+                ? // registration popup
+                  null
+                : null}
               {showJoinWaitlistPopup ? (
                 // join waitlist popup
                 <SimpleJoinWaitlistPopup
-                  emailInput={props => (
-                      <input
-                        {...props}
-                        type="email"
-                        value={emailAddress}
-                        onChange={e => setEmailAddress(e.target.value)}
-                        placeholder={site.siteMetadata.emailAddressInput.placeholder}>
-                      </input>
-                  )}
-                  emailInputErrorMessage={
-                    emailAddressIsEmpty ? (
-                      <span>{site.siteMetadata.emailAddressInput.errorMessageWhenEmpty}</span>
-                    ) : emailAddressIsInvalid ? (
-                      <span>{site.siteMetadata.emailAddressInput.errorMessageWhenInvalid}</span>
-                    ) : null}
-                  joinWaitlistButton={props => (
-                    <button {...props}
+                  emailInput={emailInput}
+                  emailInputErrorMessage={emailInputErrorMessage}
+                  joinWaitlistButton={(props) => (
+                    <button
+                      {...props}
                       onClick={async () => {
                         if (emailAddress === "") {
-                          setEmailAddressIsEmpty(true)
-                          setEmailAddressIsInvalid(false)
-                          return
+                          setEmailAddressIsEmpty(true);
+                          setEmailAddressIsInvalid(false);
+                          return;
                         }
 
                         if (!isEmail(emailAddress)) {
-                          setEmailAddressIsEmpty(false)
-                          setEmailAddressIsInvalid(true)
-                          return
+                          setEmailAddressIsEmpty(false);
+                          setEmailAddressIsInvalid(true);
+                          return;
                         }
 
                         if (isEmail(emailAddress)) {
-                          setEmailAddressIsEmpty(false)
-                          setEmailAddressIsInvalid(false)
+                          setEmailAddressIsEmpty(false);
+                          setEmailAddressIsInvalid(false);
 
-                          startLoading()
+                          startLoading();
 
-                          await addToWaitlist({ emailAddress })
+                          await addToWaitlist({ emailAddress });
 
-                          stopLoading()
+                          stopLoading();
 
-                          setDone(true)
+                          setDone(true);
                         }
-                      }}>
-                      {
-                        loading ? <Spinner name="three-bounce" color="white"></Spinner> :
-                            site.siteMetadata.joinWaitlistButton.caption
-                      }
+                      }}
+                    >
+                      {loading ? (
+                        <Spinner name="three-bounce" color="white"></Spinner>
+                      ) : (
+                        site.siteMetadata.joinWaitlistButton.caption
+                      )}
                     </button>
                   )}
-                  completeMessage={done ? site.siteMetadata.joinWaitlistCompleteMessage : null}>
-                </SimpleJoinWaitlistPopup>
+                  completeMessage={
+                    done ? site.siteMetadata.joinWaitlistCompleteMessage : null
+                  }
+                ></SimpleJoinWaitlistPopup>
               ) : null}
-            </Dimmer> : null}
+            </Dimmer>
+          ) : null}
         </>
-      )
+      );
     default:
-      throw new Error(`unsupported theme '${site.siteMetadata.theme}' specified.`);
+      throw new Error(
+        `unsupported theme '${site.siteMetadata.theme}' specified.`
+      );
   }
 }
