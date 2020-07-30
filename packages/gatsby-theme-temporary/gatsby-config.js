@@ -1,51 +1,53 @@
-const path = require("path")
+const path = require("path");
 
-module.exports = options => {
-    const theme = options.theme || "simple"
+module.exports = (options) => {
+  const theme = options.theme || "simple";
 
-    const title = options.title
-    if (!title) throw new Error("Specify title of your page.")
+  const title = options.title;
+  if (!title) throw new Error("Specify title of your page.");
 
-    const subTitle = options.subTitle
-    if (!subTitle) throw new Error("Specify sub title of your page.")
+  const subTitle = options.subTitle;
+  if (!subTitle) throw new Error("Specify sub title of your page.");
 
-    const appeals = options.appeals || null
-    const released = options.released || false
+  const appeals = options.appeals || null;
+  const released = options.released || false;
 
-    const submitButton = options.submitButton || { caption: "Register" }
-    const emailAddressInput = options.emailAddressInput || { 
-        placeholder: "Enter your email address.", 
-        errorMessageWhenEmpty: "Enter your email address.",
-        errorMessageWhenInvalid: "Invalid email address format.",
-    }
-    const joinWaitlistButton = options.joinWaitlistButton || { caption: "Join the waitlist." }
-    const joinWaitlistCompleteMessage = options.joinWaitlistCompleteMessage || "We've sent an email to you! Check it out now!"
+  const passwordRequirement = options.passwordRequirement || {
+      minLength: 8,
+      maxLength: 100,
+      mustHaveUppercase: true,
+      mustHaveLowercase: true,
+      mustHaveDigits: true,
+      mustNotHaveSpaces: true,
+      blacklist: []
+  }
 
-    return ({
-        siteMetadata: {
-            theme,
-            title,
-            subTitle,
-            appeals,
-            released,
-            submitButton,
-            emailAddressInput,
-            joinWaitlistButton,
-            joinWaitlistCompleteMessage
+  if (passwordRequirement.blacklist.length === 0) {
+    passwordRequirement.blacklist.push("")
+  }
+
+  return {
+    siteMetadata: {
+      theme,
+      title,
+      subTitle,
+      appeals,
+      released,
+      passwordRequirement
+    },
+    plugins: [
+      {
+        resolve: `gatsby-plugin-postcss`,
+      },
+      {
+        resolve: `gatsby-source-filesystem`,
+        options: {
+          name: `images`,
+          path: path.join(__dirname, `src`, `images`),
         },
-        plugins: [
-            {
-                resolve: `gatsby-plugin-postcss`
-            },
-            {
-                resolve: `gatsby-source-filesystem`,
-                options: {
-                    name: `images`,
-                    path: path.join(__dirname, `src`, `images`),
-                },
-            },
-            `gatsby-plugin-sharp`,
-            `gatsby-transformer-sharp`,
-        ],
-    })
-}
+      },
+      `gatsby-plugin-sharp`,
+      `gatsby-transformer-sharp`,
+    ],
+  };
+};

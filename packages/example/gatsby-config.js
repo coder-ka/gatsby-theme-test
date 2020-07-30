@@ -1,6 +1,7 @@
 module.exports = {
   plugins: [{
     resolve: `gatsby-theme-temporary`, options: {
+      released: true,
       title: "Build landing pages faster.",
       subTitle: "This theme enables you building landing pages for your app.",
       appeals: [{
